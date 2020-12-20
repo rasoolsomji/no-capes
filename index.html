@@ -17,27 +17,39 @@
 </body>
 
 <script type="text/javascript">
-var url = "https://script.google.com/macros/s/AKfycbwceb9Ec0E-lKIztXJCPsUy3vywXrLCvCBYv6V1ELOGFSWKLwI/exec"
-fetch(url).then(function (response) {
-	// The API call was successful!
-	return response.json();
-}).then(function(data) {
-	var entries = data.entries
-	var randomEntry = entries[Math.floor(Math.random() * entries.length)];
-	console.log(randomEntry)
+
+function httpGetAsync(theUrl, callback) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
+}
+
+var url = "https://spreadsheets.google.com/feeds/cells/14O53d7qfYHbQheYZeySQWaFTmQK2ot1hXRW2JJgeLI4/1/public/full?alt=json";
+
+httpGetAsync(url, function(response) {
+	// console.log(JSON.parse(response));
+	var jsonResponse = JSON.parse(response);
+	var cells = jsonResponse.feed.entry
+	cells.splice(0, 3)
+	// console.log(cells)
+	var numberOfEntries = cells.length / 3
+	var randomEntryIndex = (Math.floor(Math.random() * numberOfEntries)) * 3
 	var name = document.getElementById("name")
-	name.innerHTML = randomEntry.name
+	name.innerHTML = cells[randomEntryIndex].content["$t"]
 	var description = document.getElementById("description")
-	description.innerHTML = randomEntry.description
+	description.innerHTML = cells[randomEntryIndex + 1].content["$t"]
+	var linksCell = cells[randomEntryIndex + 2].content["$t"].split(",")
 	var links = document.getElementById("links")
 	var linksHtml = "Further reading: <br><ul>"
-	for (var i = 0; i < randomEntry.links.length; i++) {
-		linksHtml += `<li><a target="_blank" rel="noopener" href=${randomEntry.links[i]}>${randomEntry.links[i]}</a></li>`
+	for (var i = 0; i < linksCell.length; i++) {
+		linksHtml += `<li><a target="_blank" rel="noopener" href=${linksCell[i]}>${linksCell[i]}</a></li>`
 	}
 	links.innerHTML = linksHtml
-}).catch(function (err) {
-	// There was an error
-	console.warn('Something went wrong.', err);
-});
+
+})
 </script>
 </html>
