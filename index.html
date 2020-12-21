@@ -13,7 +13,7 @@
   <p id="links"></p>
 
   <h5>A (non-exhaustive) list of ordinary people who went above and beyond, putting their lives at risk, to help their fellow man</h5>
-  <h5>Refresh the page to load a different entry</h5> 
+  <button id="loadNext">Load Next</button>
 </body>
 
 <script type="text/javascript">
@@ -36,19 +36,30 @@ httpGetAsync(url, function(response) {
 	var cells = jsonResponse.feed.entry
 	cells.splice(0, 3)
 	// console.log(cells)
-	var numberOfEntries = cells.length / 3
-	var randomEntryIndex = (Math.floor(Math.random() * numberOfEntries)) * 3
-	var name = document.getElementById("name")
-	name.innerHTML = cells[randomEntryIndex].content["$t"]
-	var description = document.getElementById("description")
-	description.innerHTML = cells[randomEntryIndex + 1].content["$t"]
-	var linksCell = cells[randomEntryIndex + 2].content["$t"].split(",")
-	var links = document.getElementById("links")
-	var linksHtml = "Further reading: <br><ul>"
-	for (var i = 0; i < linksCell.length; i++) {
-		linksHtml += `<li><a target="_blank" rel="noopener" href=${linksCell[i]}>${linksCell[i]}</a></li>`
+	loadNextEntry()
+
+	document.addEventListener('click', function (event) {
+		if (!event.target.matches('#loadNext')) return;
+		event.preventDefault();
+		loadNextEntry()
+	}, false);
+
+	function loadNextEntry() {
+		var numberOfEntries = cells.length / 3
+		var randomEntryIndex = (Math.floor(Math.random() * numberOfEntries)) * 3
+		var entryDetails = cells.splice(randomEntryIndex, 3)
+		var name = document.getElementById("name")
+		name.innerHTML = entryDetails[0].content["$t"]
+		var description = document.getElementById("description")
+		description.innerHTML = entryDetails[1].content["$t"]
+		var linksCell = entryDetails[2].content["$t"].split(",")
+		var links = document.getElementById("links")
+		var linksHtml = "Further reading: <br><ul>"
+		for (var i = 0; i < linksCell.length; i++) {
+			linksHtml += `<li><a target="_blank" rel="noopener" href=${linksCell[i]}>${linksCell[i]}</a></li>`
+		}
+		links.innerHTML = linksHtml
 	}
-	links.innerHTML = linksHtml
 
 })
 </script>
